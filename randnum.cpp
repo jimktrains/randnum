@@ -3,39 +3,80 @@
 #include <string>
 #include <chrono>
 
-int main(int argc, char **argv)
+#include "cxxopts.hpp"
+
+
+int main(int argc, char *argv[])
 {
-  if (argc < 2) { return -1; }
+
 
   unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-  std::default_random_engine generator(seed);
+  bool verbose = false;
+  bool gaussian = false;
+  bool uniform_real = false;
+  bool uniform_int = false;
+  unsigned times = 1;
+  double mu = 0.0;
+  double sigma = 1.0;
+
+  cxxopts::Options options("randnum", "random swiss army knife");
+  options.add_options()
+    ("g,gaussian"     , "gaussian/normal distribution.", cxxopts::value<bool>(gaussian))
+    ("u,uniform-real" , "uniform over the reals (doubles); Defaults between 0 and 1.",cxxopts::value<bool>(uniform_real))
+    ("i,uniform-int"  , "uniform over integers(long); Defaults between 0 and 9.",cxxopts::value<bool>(uniform_int))
+    ("n,times"        , "number of times to generate random values.", cxxopts::value<unsigned>(times))
+    ("m,mu"           , "Mean value for a gaussian. Default 0.", cxxopts::value<double>(mu))
+    ("s,sigma"        , "Standard deviation for a gaussian. Default 1.", cxxopts::value<double>(sigma))
+    ("t,top"          , "Top of range for uniform.")
+    ("b,bottom"       , "Bottom of range for uniform.")
+    ("seed"           , "Seed for the PRNG", cxxopts::value<unsigned>(seed))
+    ("v,verbose"      , "Print additional information, such as the seed", cxxopts::value<bool>(verbose))
+    ("h,help"         , "produce help message")
+  ;
+  options.parse(argc, argv);
+  if (verbose)
+  {
+    std::cout << "Seed: " << seed << std::endl;
+  }
+  std::mt19937 generator(seed);
 
   
-  if (("normal" == std::string(argv[1])) || 
-      ("gaussian" == std::string(argv[1])))
+  if (gaussian)
   {
-  
-    if (argc < 4) { return -2; }
-    double mu = std::stod(argv[2]);
-    double sigma =  std::stod(argv[3]);
     std::normal_distribution<double> distribution(mu, sigma);
-    std::cout << distribution(generator) << std::endl;
+    for(int i = 0; i < times; i++)
+    {
+      std::cout << distribution(generator) << std::endl;
+    }
   }
-  else if("uniform-real" == std::string(argv[1]))
+  else if(uniform_real)
   {
-    if (argc < 4) { return -2; }
-    double begin = std::stod(argv[2]);
-    double end =  std::stod(argv[3]);
-    std::uniform_real_distribution<double> distribution (begin, end);
-    std::cout << distribution(generator) << std::endl;
+    double top = 1.0;
+    double bottom = 0.0;
+    if (options.count("top")) { top = options["top"].as<double>(); }
+    if (options.count("bottom")) { top = options["bottom"].as<double>(); }
+    std::uniform_real_distribution<double> distribution (bottom, top);
+    for(int i = 0; i < times; i++)
+    {
+      std::cout << distribution(generator) << std::endl;
+    }
   }
-  else if("uniform-int" == std::string(argv[1]))
+  else if(uniform_int)
   {
-    if (argc < 4) { return -2; }
-    int begin = std::stoi(argv[2]);
-    int end =  std::stoi(argv[3]);
-    std::uniform_int_distribution<int> distribution (begin, end);
-    std::cout << distribution(generator) << std::endl;
+    long top = 9;
+    long bottom = 0;
+    if (options.count("top")) { top = options["top"].as<long>(); }
+    if (options.count("bottom")) { top = options["bottom"].as<long>(); }
+    std::uniform_int_distribution<long> distribution (bottom, top);
+    for(int i = 0; i < times; i++)
+    {
+      std::cout << distribution(generator) << std::endl;
+    }
+  }
+  else
+  {
+    std::cout << options.help({""}) << std::endl;
+    exit(0);
   }
 
   return 0;
