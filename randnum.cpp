@@ -35,8 +35,8 @@ int main(int argc, char *argv[])
     ("n,times"        , "number of times to generate random values.", cxxopts::value<unsigned>(times))
     ("m,mu"           , "Mean value for a gaussian. Default 0.", cxxopts::value<double>(mu))
     ("s,sigma"        , "Standard deviation for a gaussian. Default 1.", cxxopts::value<double>(sigma))
-    ("t,top"          , "Top of range for uniform.")
-    ("b,bottom"       , "Bottom of range for uniform.")
+    ("t,top"          , "Top of range for uniform.", cxxopts::value<std::string>())
+    ("b,bottom"       , "Bottom of range for uniform.", cxxopts::value<std::string>())
     ("seed"           , "Seed for the PRNG", cxxopts::value<unsigned>(seed))
     ("v,verbose"      , "Print additional information, such as the seed", cxxopts::value<bool>(verbose))
     ("h,help"         , "produce help message")
@@ -58,8 +58,8 @@ int main(int argc, char *argv[])
   {
     double top = 1.0;
     double bottom = 0.0;
-    if (options.count("top")) { top = options["top"].as<double>(); }
-    if (options.count("bottom")) { top = options["bottom"].as<double>(); }
+    if (options.count("top")) { top = std::stod(options["top"].as<std::string>()); }
+    if (options.count("bottom")) { bottom = std::stod(options["bottom"].as<std::string>()); }
     std::uniform_real_distribution<double> distribution (bottom, top);
     generate_values(std::bind(distribution, generator), times);
   }
@@ -67,8 +67,8 @@ int main(int argc, char *argv[])
   {
     long top = 9;
     long bottom = 0;
-    if (options.count("top")) { top = options["top"].as<long>(); }
-    if (options.count("bottom")) { top = options["bottom"].as<long>(); }
+    if (options.count("top")) { top = std::stol(options["top"].as<std::string>()); }
+    if (options.count("bottom")) { bottom = std::stol(options["bottom"].as<std::string>()); }
     std::uniform_int_distribution<long> distribution (bottom, top);
     generate_values(std::bind(distribution, generator), times);
   }
