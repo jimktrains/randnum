@@ -5,6 +5,14 @@
 
 #include "cxxopts.hpp"
 
+template<typename Dice>
+void generate_values(Dice dice, unsigned times)
+{
+  for(int i = 0; i < times; i++)
+  {
+    std::cout << dice() << std::endl;
+  }
+}
 
 int main(int argc, char *argv[])
 {
@@ -44,10 +52,7 @@ int main(int argc, char *argv[])
   if (gaussian)
   {
     std::normal_distribution<double> distribution(mu, sigma);
-    for(int i = 0; i < times; i++)
-    {
-      std::cout << distribution(generator) << std::endl;
-    }
+    generate_values(std::bind(distribution, generator), times);
   }
   else if(uniform_real)
   {
@@ -56,10 +61,7 @@ int main(int argc, char *argv[])
     if (options.count("top")) { top = options["top"].as<double>(); }
     if (options.count("bottom")) { top = options["bottom"].as<double>(); }
     std::uniform_real_distribution<double> distribution (bottom, top);
-    for(int i = 0; i < times; i++)
-    {
-      std::cout << distribution(generator) << std::endl;
-    }
+    generate_values(std::bind(distribution, generator), times);
   }
   else if(uniform_int)
   {
@@ -68,10 +70,7 @@ int main(int argc, char *argv[])
     if (options.count("top")) { top = options["top"].as<long>(); }
     if (options.count("bottom")) { top = options["bottom"].as<long>(); }
     std::uniform_int_distribution<long> distribution (bottom, top);
-    for(int i = 0; i < times; i++)
-    {
-      std::cout << distribution(generator) << std::endl;
-    }
+    generate_values(std::bind(distribution, generator), times);
   }
   else
   {
